@@ -22,7 +22,7 @@ when the map reloads, all the points where a fish was added will be rendered int
 I have not used a git ignore file to remove any data as this project is not hosted and contains no sensitive information.
 The geo-location points are also random and not of any value.
 
-# running the app.
+# running the app. (still in development)
 In order to run fish finder locally you will need to make sure node js and vue js is installed,
 - inside the fishfinder/client folder run --> npm run serve (runs the front end)
 - inside the fishfinder folder run --> node app (runs the server instance) 
