@@ -17,19 +17,11 @@ export default {
   },
   data: function() {
     return {
-      view: null,
-      fish: []      
+      view: null,   
     };
   },
   mounted() {
-      const that = this
-
-    axios.get('http://localhost:3000/allFish')
-            .then(function (response) {
-              that.fish = response.data.fish
-            })
-            .then(()=>{
-
+      
     loadModules([
         "esri/Map", 
         "esri/views/MapView", 
@@ -44,9 +36,9 @@ export default {
       E.ArcGISMap = ArcGISMap;
       E.MapView = MapView;
       E.Point = Point;
+      E.Graphic = Graphic;
+      E.GraphicsLayer = GraphicsLayer
 
-      //make axios call
-  
       const map = new E.ArcGISMap({
         basemap: "topo-vector"
       });
@@ -55,29 +47,43 @@ export default {
         container: this.$el,
         map: map,
         center: [this.coords.latitude, this.coords.longitude],
-        zoom: 3
+        zoom: 4
       })
-        var graphicsLayer = new GraphicsLayer(); 
-
-      for(let i = 0; i < this.fish.length; i++){
-        console.log('fish[i]',this.fish[i].coords[0],this.fish[i].coords[1], i)
-
-                 let point = {type: "point", longitude: this.fish[i].coords[0], latitude: this.fish[i].coords[1] };
-
-                  var simpleMarkerSymbol = {
-                      type: "simple-marker",
-                      color: [226, 119, 40],  // orange
-                      outline: { color: [255, 255, 255], width: 1 }
-                  };
-
-                 window['graphic'+i] = new Graphic({ geometry: point, symbol: simpleMarkerSymbol}); //graphics need unique names
-                graphicsLayer.add(window['graphic'+i]);        
-            }
-            map.add(graphicsLayer); 
+ 
              
-               
+      this.view.when(function(){
+              var fish = null
+             axios.get('http://localhost:3000/allFish')
+                  .then(function (response) {
+                    fish = response.data.fish
+                  })
+             
+                  .then(()=>{
+                      console.log('map loaded',fish)
+                      var graphicsLayer = new E.GraphicsLayer()
+                    
+                        for(let i = 0; i < fish.length; i++){
+                             let point = {type: "point", longitude: fish[i].coords[0], latitude: fish[i].coords[1] };
+                                  var simpleMarkerSymbol = {
+                                      type: "simple-marker",
+                                      color: [226, 119, 40],  // orange
+                                      outline: { color: [255, 255, 255], width: 1 }
+                                  };
+
+                                let graphic = new E.Graphic({ geometry: point, symbol: simpleMarkerSymbol}); //graphics need unique names
+                    
+                                graphicsLayer.add(graphic);       
+                            }
+                        map.add(graphicsLayer);
+                  })
+         
+          }, 
+
+          function(error){
+            console.log("The view's resources failed to load: ", error);
+          });
+                      
     })
-  });
    
   },
   watch: {
@@ -99,7 +105,6 @@ export default {
         console.log("Map modules are still loading...");
       }
     },
-
   }
 };
 </script>

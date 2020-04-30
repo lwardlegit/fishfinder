@@ -21,8 +21,8 @@ export default {
   },
   data: () => ({
     coords: {
-      latitude: -118,
-      longitude: 34,
+      latitude: -76.7688704,
+      longitude: 36.403330,
     },
 
     date: '',
@@ -30,10 +30,6 @@ export default {
     allFish: []
 
   }),
-
-  created(){
-    
-  },
 
   methods: {
 
@@ -53,6 +49,7 @@ export default {
     },
 
      addFishToDb(){
+       console.log(this.coords.latitude,this.coords.longitude)
        fetch('http://localhost:3000/addFish',{
          method: 'POST', 
          headers: {
@@ -78,10 +75,10 @@ export default {
     getLocation() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(position => {
-          this.coords = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          };
+        
+            this.coords.latitude = position.coords.latitude,
+            this.coords.longitude = position.coords.longitude
+         
         });
       } else {
         console.log("Geolocation not supported by your browser.");
