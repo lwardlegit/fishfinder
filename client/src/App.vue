@@ -1,10 +1,13 @@
 <template>
   <div id="app">
     <web-map id="mapComponent" ref="map" :coords="coords"/>
+
+    <div class="datediv">
      <b-form-datepicker id="datepicker" v-model="date" class="mb-2"></b-form-datepicker>
+     </div>
             <div class="maincontent">
          
-                    <input type="text" placeholder="fish type" v-model="fishType">
+                    <b-form-input class="mainItem" type="text" placeholder="fish type" v-model="fishType"></b-form-input>
                     <b-button class="btn-block center" @click="updateCenter()" variant="primary">log new fish</b-button>
               </div>
          </div>
@@ -114,10 +117,17 @@ export default {
     display: block;
     padding: 1em;
   }
-  .maincontent div{
-    margin: 1em;
+  .datediv{
     width: 50%;
-
+    margin: 0 auto;
+  }
+  .maincontent div{
+    justify-content: center;
+  }
+  .mainItem{
+    width: 100%;
+    margin: 0 auto;
+    margin-bottom: .7em;
   }
 }
 </style>
