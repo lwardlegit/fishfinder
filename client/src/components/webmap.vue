@@ -17,17 +17,29 @@ export default {
   },
   data: function() {
     return {
-      view: null,   
+      view: null,  
+      fish: [] 
     };
   },
-  mounted() {
-      
+  created() {
+    var that = this
+    this.fetchFishLocations()
+                          
+                  .then((response)=> {
+                          console.log('fish data',response.data.fish);
+                          that.fish = response.data.fish
+                  }).then(()=>{
+                    console.log('this.fish',that.fish)
+
+                  }).then(()=>{  //LOAD MAP AFTER DATA IS SET
+
     loadModules([
         "esri/Map", 
         "esri/views/MapView", 
         "esri/geometry/Point", 
         "esri/Graphic",
-        "esri/layers/GraphicsLayer"
+        "esri/layers/GraphicsLayer",
+        
         ], {
       css: true
     })
@@ -39,6 +51,7 @@ export default {
       E.Graphic = Graphic;
       E.GraphicsLayer = GraphicsLayer
 
+
       const map = new E.ArcGISMap({
         basemap: "topo-vector"
       });
@@ -47,23 +60,35 @@ export default {
         container: this.$el,
         map: map,
         center: [this.coords.latitude, this.coords.longitude],
-        zoom: 4
+        zoom: 4 
       })
+
+     
+      this.view.popup.autoOpenEnabled = false;
+      this.view.on("click", (event) => {
+                  
+                    for(var i = 0; i < that.fish.length; i++){
+                      if(that.fish[i].coords[0] <= event.mapPoint.longitude+1 && that.fish[i].coords[0] >= event.mapPoint.longitude-1 && that.fish[i].coords[1] <= event.mapPoint.latitude+1 && that.fish[i].coords[1] >= event.mapPoint.latitude-1){
+                        console.log('matched point')
+
+                        this.view.popup.open({
+                          // Set the popup's title to the coordinates of the clicked location
+                          title: ` longitude: ${that.fish[i].coords[0]}  latitude: ${that.fish[i].coords[1]} Fish Type: ${that.fish[i].species}`,
+                          location: event.mapPoint // Set the location of the popup to the clicked location
+                        });
+                      }
+                      console.log(that.fish[i].coords[0], that.fish[i].coords[1])
+                      console.log("click event: ", event.mapPoint.latitude,event.mapPoint.longitude);
+                    }
+           });
  
              
       this.view.when(function(){
-              var fish = null
-             axios.get('http://localhost:3000/allFish')
-                  .then(function (response) {
-                    fish = response.data.fish
-                  })
              
-                  .then(()=>{
-                      console.log('map loaded',fish)
                       var graphicsLayer = new E.GraphicsLayer()
                     
-                        for(let i = 0; i < fish.length; i++){
-                             let point = {type: "point", longitude: fish[i].coords[0], latitude: fish[i].coords[1] };
+                        for(let i = 0; i < that.fish.length; i++){
+                             let point = {type: "point", longitude: that.fish[i].coords[0], latitude: that.fish[i].coords[1] };
                                   var simpleMarkerSymbol = {
                                       type: "simple-marker",
                                       color: [226, 119, 40],  // orange
@@ -71,20 +96,19 @@ export default {
                                   };
 
                                 let graphic = new E.Graphic({ geometry: point, symbol: simpleMarkerSymbol}); //graphics need unique names
-                    
+
+
                                 graphicsLayer.add(graphic);       
                             }
                         map.add(graphicsLayer);
-                  })
-         
           }, 
 
           function(error){
             console.log("The view's resources failed to load: ", error);
           });
                       
+        })
     })
-   
   },
   watch: {
     coords() {
@@ -105,7 +129,12 @@ export default {
         console.log("Map modules are still loading...");
       }
     },
+
+    fetchFishLocations(){
+         return axios.get('http://localhost:3000/allFish')
+    }
   }
+
 };
 </script>
 

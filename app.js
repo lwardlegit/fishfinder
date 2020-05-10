@@ -5,7 +5,7 @@ const axios = require('axios');
 
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
-const url = 'mongodb://localhost:27017';
+const url = 'mongodb://localhost:27017/fishfinder';
 const dbName = 'fishfinder';
  
 
@@ -15,19 +15,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded()); //Parse URL-encoded bodies
 
-
-
-function getFish(){
-    // New `return` statement
-    try{
-            return axios.get('https://www.fishwatch.gov/api/species')
-    }
-        catch(err){
-            console.log(err)
-    }   
-}
-
-
+MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  console.log("Database created!");
+  db.close();
+});
 
 app.get('/allFish', async(req,res) =>{
     try{  
